@@ -44,3 +44,9 @@ class Plot():
         plt.xlim(0,1500)
         plt.plot(self.freqs[1:], self.fft_sig[1:], linewidth = 0.5)  # [1:]去掉f=0的直流信号
         plt.show()
+
+
+    def plot_all(self):
+        self.plot_origin_signal()
+        self.plot_sam_signal()
+        self.plot_fft()    

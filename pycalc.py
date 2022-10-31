@@ -46,10 +46,10 @@ class PyCalcWindow(QMainWindow):#此类继承自QMainWindow.
         self.buttonMap = {}#创建空字典来保存计算器按钮
         buttonsLayout = QGridLayout()
         keyBoard = [
-            ["7", "8", "9", "/", "C"],
-            ["4", "5", "6", "*", "("],
-            ["1", "2", "3", "-", ")"],
-            ["0", "00", ".", "+", "="],
+            ["7", "8", "9", "A", "C"],
+            ["4", "5", "6", "B", "D"],
+            ["1", "2", "3", "随机", "清零"],
+            ["0", "*", "#", "确认", "播放"],
         ]#创建列表来存储键标签
 
         for row, keys in enumerate(keyBoard):#外循环遍历行
@@ -75,7 +75,7 @@ class PyCalcWindow(QMainWindow):#此类继承自QMainWindow.
 def evaluateExpression(expression):
     '''计算表达式'''
     try:
-        result = str(eval(expression, {}, {}))#eval()评估以字符串形式出现的数学表达式
+        result = expression
     except Exception:
         result = ERROR_MSG
     return result      #评估成功，则返回result  
@@ -92,8 +92,9 @@ class PyCalc:
         self._connectSignalsAndSlots()#建立信号和插槽的所有必需连接
 
     def _calculateResult(self):
-        result = self._evaluate(expression=self._view.displayText()) #利用eval()计算
+        result = self._evaluate(expression=self._view.displayText()) #利用eval()计算,同时displaytext会输入当前表达式
         self._view.setDisplayText(result)#使用计算结果更新显示文本
+        return result
 
     def _buildExpression(self, subExpression): #构建数学表达式
         if self._view.displayText() == ERROR_MSG:
@@ -103,13 +104,15 @@ class PyCalc:
 
     def _connectSignalsAndSlots(self):#将所有按钮的.clicked信号与控制器类中的相应插槽方法连接
         for keySymbol, button in self._view.buttonMap.items():
-            if keySymbol not in {"=", "C"}:
+            if keySymbol not in {"=", "C","确认"}:
                 button.clicked.connect(
                     partial(self._buildExpression, keySymbol)#（call function + 输入的参数）实现数学表达式的构建
                 )
         self._view.buttonMap["="].clicked.connect(self._calculateResult)#若‘=’, call _calculate
+        self._view.buttonMap["确认"].clicked.connect(self._calculateResult)#若‘确认’, call function
         self._view.display.returnPressed.connect(self._calculateResult)
         self._view.buttonMap["C"].clicked.connect(self._view.clearDisplay)#若‘C’, call clearDisplay
+        self._view.buttonMap["清零"].clicked.connect(self._view.clearDisplay)#若‘C’, call clearDisplay
 
 
 def main():
