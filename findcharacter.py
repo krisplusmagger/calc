@@ -58,7 +58,8 @@ class Find_Character():
                 col_check = FREQ_COL[col]-delta < low_freq < FREQ_COL[col]+delta ##找到了返回true
                 if row_check and col_check:
                     p = FREQ_TABLE[(FREQ_ROW[row], FREQ_COL[col])]
-        return p
+                    return p
+        return None
 
     def detect_one(self,data,sam_fre):
         ''' 识别一位号码 '''
@@ -70,6 +71,8 @@ class Find_Character():
             if xfa[i] > xfa[i-1] and xfa[i] > xfa[i+1]:
                 local.append(xfa[i])
         local = sorted(local)
+        if(len(local) < 2):
+            return None
         loc = np.where(xfa == local[-1])
         high_freq = freqs[loc[0][0]]
         loc = np.where(xfa == local[-2])
@@ -79,11 +82,12 @@ class Find_Character():
             temp = high_freq
             high_freq = low_freq
             low_freq = temp
-        # 查看具体频率
-        print('high_freq, low_freq = {:.2f}, {:.2f}'.format(high_freq, low_freq))
+
         # 判断字符
         p = self.judge_char(high_freq, low_freq)
-
+        if(p != None):
+            # 查看具体频率
+            print('high_freq, low_freq = {:.2f}, {:.2f}'.format(high_freq, low_freq))
         return p    
 
     def detect_sig(self):
@@ -103,6 +107,7 @@ class Find_Character():
             else:
                 if len(digit) != 0:
                     p = self.detect_one(digit,self.sam_freq) 
-                    result.append(p)
+                    if(p != None):  
+                        result.append(p)
                     digit = []
         return result    

@@ -1,4 +1,5 @@
 import numpy as np 
+#
 class Create_Fft_Sig():
 
     def __init__(self, lasting_time, sam_freq, signal):

@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from scipy.fft import fft
+import matplotlib.pyplot as plt 
 import scipy.io.wavfile as wav
 import matplotlib.pyplot as plt
 from plot import Plot
@@ -9,6 +10,8 @@ from demfgenerator import DtmfGenerator
 from createfitsig import Create_Fft_Sig
 from pycalc import PyCalcWindow, PyCalc
 from unittest import result#导入sys. 该模块提供了exit()用于彻底终止应用程序的功能
+##import commpy.channels.awgn as awgn
+from commpy.channels import awgn
 from PyQt6.QtCore import Qt 
 from playsound import playsound
 from functools import partial
@@ -158,27 +161,25 @@ def read_input(strings):
 
     # phonenumber = str('1234567A')
     phonenumber = strings 
-    samplefrequency = np.int(400000)
+    samplefrequency = np.int(440000) #生成采样率40k
     toneduration = np.float(0.10)
     delay = np.float(0.10)
-    amplitude = np.float(2)
+    amplitude = np.float(2) #幅度为2 
     out_name = str('haha'+'.wav')
-    signal  = DtmfGenerator(phonenumber, out_name, samplefrequency, toneduration, delay, amplitude)
-    a = signal.compose()
-    samplefrequency = np.int(400000)
+    signal  = DtmfGenerator(phonenumber, out_name, samplefrequency, toneduration, delay, amplitude) #示例化DTMF模拟信号类
+    a = signal.compose()   #调用类的方法，生成dtmf模拟信号，存储在a的变量中
+    a_awgn = awgn(a,0,1)   #  通过0db的awgn信道
 
-    sam_fre = 10000
-
-    endpalce = len(a) / samplefrequency
-    fft_calc = Create_Fft_Sig(endpalce,sam_fre, a)
-    x_sig = fft_calc.sam_signal() #产生采样信号
+    #samplefrequency = np.int(8000)
+    sam_fre = 8000 #伪模拟信号的采样频率
+    sig_lasting_time = len(a_awgn) / samplefrequency  #信号持续时间#
+    fft_calc = Create_Fft_Sig(sig_lasting_time, sam_fre, a_awgn)
+    x_sig = fft_calc.sam_signal() #产生降采样信号
 
     (freqs, xfa) = caculate_fft(sam_fre,x_sig)
-
-    plot_views = Plot(a,x_sig,endpalce,sam_fre,freqs,xfa)
+    plot_views = Plot(a_awgn, x_sig, sig_lasting_time, sam_fre, freqs, xfa)
     plot_views.plot_all()
-
-    detect_chr = Find_Character(x_sig,sam_fre)
+    detect_chr = Find_Character(x_sig, sam_fre)
     print(detect_chr.detect_sig()) 
     return str(detect_chr.detect_sig())
 
