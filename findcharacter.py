@@ -43,6 +43,7 @@ class Find_Character():
         freqs = np.linspace(0,sam_freq/2, len(sampled_signal)//2 + 1)
         # wave = np.fft.fft(signal)
         # 利用np.fft.rfft()进行FFT计算
+        #代码中将xf除以len(sampled_signal)。这是因为在傅里叶变换中，归一化是常见的操作，通过除以序列的长度可以确保结果的幅度正确表示原始信号。
         xf = np.fft.rfft(sampled_signal) / len(sampled_signal)
         # 取绝对值表示幅值
         #wavea = np.abs(wave)
@@ -89,14 +90,14 @@ class Find_Character():
             # 查看具体频率
             print('high_freq, low_freq = {:.2f}, {:.2f}'.format(high_freq, low_freq))
         return p    
-
+    #监测输入信号并识别数字
     def detect_sig(self):
         length = len(self.sampled_signal)
         result = []  # result
         digit = []  # signal that needed to be processed 
         # 通过采样率除以最低频率向上取整计算得出
 
-        interval = int(np.ceil(self.sam_freq / min(min(FREQ_ROW), min(FREQ_COL))))
+        interval = int(np.ceil(self.sam_freq / min(min(FREQ_ROW), min(FREQ_COL)))) #间隔
         # initiate threshold
         # by (mean + (max-mini)* proportion)
         threshold = int(np.mean(self.sampled_signal) + (np.max(self.sampled_signal) - np.mean(self.sampled_signal))*0.2)
@@ -110,4 +111,28 @@ class Find_Character():
                     if(p != None):  
                         result.append(p)
                     digit = []
-        return result    
+        return result 
+    
+    def detect_signal_2(self):
+        length = len(self.sampled_signal)
+        result = []  # result
+        digit = []  # signal that needed to be processed 
+        # 通过采样率除以最低频率向上取整计算得出
+        value_time = 0
+        interval = int(np.ceil(self.sam_freq / min(min(FREQ_ROW), min(FREQ_COL)))) #间隔
+        # initiate threshold
+        # by (mean + (max-mini)* proportion)
+        #threshold = int(np.mean(self.sampled_signal) + (np.max(self.sampled_signal) - np.mean(self.sampled_signal))*0.2)
+        for i in range(length - interval):
+                
+                for i in range(i, i + interval):
+                    digit.append(self.sampled_signal[i]) #记录每段区间 
+                else:
+                    if len(digit) != 0:
+                        p = self.detect_one(digit,self.sam_freq) 
+                        if(p != None):  
+                            result.append(p)
+                        digit = []
+        return result 
+
+
