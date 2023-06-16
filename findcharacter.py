@@ -72,8 +72,8 @@ class Find_Character():
             if xfa[i] > xfa[i-1] and xfa[i] > xfa[i+1]:
                 local.append(xfa[i])
         local = sorted(local)
-        if(len(local) < 2):
-            return None
+        # if(len(local) < 2):
+        #     return None
         loc = np.where(xfa == local[-1])
         high_freq = freqs[loc[0][0]]
         loc = np.where(xfa == local[-2])
@@ -83,13 +83,13 @@ class Find_Character():
             temp = high_freq
             high_freq = low_freq
             low_freq = temp
-
         # 判断字符
         p = self.judge_char(high_freq, low_freq)
-        if(p != None):
+        #if(p != None):
             # 查看具体频率
-            print('high_freq, low_freq = {:.2f}, {:.2f}'.format(high_freq, low_freq))
+            ##print('high_freq, low_freq = {:.2f}, {:.2f}'.format(high_freq, low_freq))
         return p    
+    
     #监测输入信号并识别数字
     def detect_sig(self):
         length = len(self.sampled_signal)
@@ -118,21 +118,24 @@ class Find_Character():
         result = []  # result
         digit = []  # signal that needed to be processed 
         # 通过采样率除以最低频率向上取整计算得出
-        value_time = 0
-        interval = int(np.ceil(self.sam_freq / min(min(FREQ_ROW), min(FREQ_COL)))) #间隔
+        interval = 800  #信号持续时间长度为800
         # initiate threshold
         # by (mean + (max-mini)* proportion)
         #threshold = int(np.mean(self.sampled_signal) + (np.max(self.sampled_signal) - np.mean(self.sampled_signal))*0.2)
-        for i in range(length - interval):
-                
-                for i in range(i, i + interval):
-                    digit.append(self.sampled_signal[i]) #记录每段区间 
-                else:
-                    if len(digit) != 0:
-                        p = self.detect_one(digit,self.sam_freq) 
-                        if(p != None):  
-                            result.append(p)
-                        digit = []
+        i = 0
+        j = 0
+        while(i <= length - interval):    #从0到1600 - 800 = 800
+                for i in range(i, i + interval): #范围0-800（实际的），最终i=799,第二次800-1600，实际1599
+                    if j < 256:
+                        digit.append(self.sampled_signal[i]) #记录每段区间前512点，做FFT
+                        j += 1 
+                i += 1    
+                j = 0
+                if len(digit) != 0:
+                    #将记录的区间信号送入检测
+                    p = self.detect_one(digit,self.sam_freq) 
+                    result.append(p)
+                    digit = []
         return result 
 
 

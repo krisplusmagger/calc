@@ -62,6 +62,6 @@ class DtmfGenerator:
         for number in self.phone_number:
             tone_delay_signal = self.__dtmf_function(number, self.Fs, self.time, self.delay, self.amp)
             signal = np.append(signal, tone_delay_signal)
-
+        #注意！
         wav.write(self.file_name, self.Fs, signal)
         return signal
